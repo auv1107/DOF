@@ -5,12 +5,11 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
@@ -19,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView mImage;
     SeekBar mSeekbar;
     Bitmap mBitmap;
+    MaskLayer mMaskLayer;
 
     int mProcess;
 
@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
                 if (mImage != null) {
 //                    FlashAnimation.flashOnView(mImage, 1, 0.1f, 300, 0);
                     testFlashCanvasAnimation();
+                    mMaskLayer.mDelegate.mPaths.clear();
+                    mMaskLayer.postInvalidate();
                 }
             }
         });
@@ -76,17 +78,17 @@ public class MainActivity extends AppCompatActivity {
     public void findViews() {
         mImage = (ImageView) findViewById(R.id.image);
         mSeekbar = (SeekBar) findViewById(R.id.seekbar);
+        mMaskLayer = (MaskLayer) findViewById(R.id.maskLayer);
     }
 
     public void initViews() {
         mProcess = mSeekbar.getProgress();
         DOFOnImage(mImage, mProcess);
-        mImage.setOnTouchListener(new ImageTouchDelegate());
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 mProcess = mSeekbar.getProgress();
-                DOFOnImage(mImage, mProcess);
+                DOFOnImage(mImage, mProcess >> 2);
             }
 
             @Override
@@ -99,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        mMaskLayer.setTouchDelegate(new ImageTouchDelegate());
     }
     AsyncTask lastTask = null;
 
