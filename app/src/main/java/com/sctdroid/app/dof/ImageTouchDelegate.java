@@ -40,4 +40,12 @@ public class ImageTouchDelegate implements View.OnTouchListener {
         v.postInvalidate();
         return true;
     }
+
+    public void reset() {
+        if (mPaths == null) {
+            mPaths = new ArrayList<>();
+        } else {
+            mPaths.clear();
+        }
+    }
 }

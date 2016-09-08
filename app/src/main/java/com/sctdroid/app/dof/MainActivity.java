@@ -1,5 +1,6 @@
 package com.sctdroid.app.dof;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +17,7 @@ import android.widget.SeekBar;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     ImageView mImage;
     SeekBar mSeekbar;
     Bitmap mBitmap;
@@ -69,10 +72,25 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            PhotoFileManager.startPickActivity(this);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null) return;
+        Log.d(TAG, PhotoFileManager.getPath(this, data.getData()));
+        String url = PhotoFileManager.getPath(this, data.getData());
+        Bitmap bitmap = PhotoFileManager.getLoacalBitmap(url);
+        mBitmap = bitmap;
+        mImage.setImageBitmap(bitmap);
+        mMaskLayer.mDelegate.reset();
+        mMaskLayer.setBitmap(bitmap);
+        DOFOnImage(mImage, mProcess >> 2);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public void findViews() {

@@ -62,15 +62,26 @@ public class MaskLayer extends ImageView {
         mShaderXFermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
         mNormal = new PorterDuffXfermode(PorterDuff.Mode.XOR);
 
-        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.car);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.car);
+        setBitmap(bitmap);
+    }
+    public void setBitmap(Bitmap bitmap) {
+        mBitmap = bitmap;
         post(new Runnable() {
             @Override
             public void run() {
                 mSrc.set(0,0,mBitmap.getWidth(),mBitmap.getHeight());
-                float scale = mBitmap.getWidth() * 1.0f / getWidth();
-                int height = (int) (mBitmap.getHeight() / scale);
-                int top = (getHeight() - height) / 2;
-                mDst.set(0, top, getWidth(), top+height);
+                float scaleX = mBitmap.getWidth() * 1.0f / getWidth();
+                float scaleY = mBitmap.getHeight() * 1.0f / getHeight();
+                if (scaleX > scaleY) {
+                    int height = (int) (mBitmap.getHeight() / scaleX);
+                    int top = (getHeight() - height) / 2;
+                    mDst.set(0, top, getWidth(), top + height);
+                } else {
+                    int width = (int) (mBitmap.getWidth() / scaleY);
+                    int left = (getWidth() - width) / 2;
+                    mDst.set(left, 0, left + width, getHeight());
+                }
             }
         });
     }
