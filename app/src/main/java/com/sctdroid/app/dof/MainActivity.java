@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void initViews() {
         mProcess = mSeekbar.getProgress();
-        DOFOnImage(mImage, mProcess);
+        DOFOnImage(mImage, mProcess >> 2);
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
