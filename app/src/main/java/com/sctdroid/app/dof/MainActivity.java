@@ -14,16 +14,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import com.sctdroid.app.dof.StatusMachine.BlurEditStatus;
+import com.sctdroid.app.dof.StatusMachine.IStatus;
+import com.sctdroid.app.dof.StatusMachine.PencelEditStatus;
+import com.sctdroid.app.dof.StatusMachine.StepContext;
+
+public class MainActivity extends AppCompatActivity implements IScene {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     ImageView mImage;
     SeekBar mSeekbar;
     Bitmap mBitmap;
     MaskLayer mMaskLayer;
+    TextView mNextStep;
 
     int mProcess;
+    StepContext mStepContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +52,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        initStatusMachine();
         initObjects();
         findViews();
         initViews();
     }
+
+    private void initStatusMachine() {
+        mStepContext = new StepContext(new PencelEditStatus(this))
+                .next(new BlurEditStatus(this));
+    }
+
+    @Override
+    public void updateMaskLayerMode(int mode) {
+        if (mMaskLayer != null) {
+            mMaskLayer.setMode(mode);
+        }
+    }
+
     public void testFlashCanvasAnimation() {
         FlashCanvasAnimation animation = new FlashCanvasAnimation();
     }
@@ -97,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         mImage = (ImageView) findViewById(R.id.image);
         mSeekbar = (SeekBar) findViewById(R.id.seekbar);
         mMaskLayer = (MaskLayer) findViewById(R.id.maskLayer);
+        mNextStep = (TextView) findViewById(R.id.nextStep);
     }
 
     public void initViews() {
@@ -120,6 +143,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mMaskLayer.setTouchDelegate(new ImageTouchDelegate());
+
+        mNextStep.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mStepContext != null && mStepContext.hasNext()) {
+                    mStepContext.enterNextStep();
+                    mMaskLayer.postInvalidate();
+                }
+            }
+        });
     }
     AsyncTask lastTask = null;
 

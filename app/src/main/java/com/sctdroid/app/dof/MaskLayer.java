@@ -26,6 +26,15 @@ public class MaskLayer extends ImageView {
     private PorterDuffXfermode mShaderXFermode;
     private Xfermode mNormal;
 
+    public static final int MODE_PENCEL = 0;
+    public static final int MODE_BLUR = 1;
+
+    public void setMode(int mode) {
+        this.mMode = mode;
+    }
+
+    private int mMode = MODE_PENCEL;
+
     public MaskLayer(Context context) {
         this(context, null);
     }
@@ -89,11 +98,12 @@ public class MaskLayer extends ImageView {
     public Paint getDefaultPaint() {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.WHITE);
+        paint.setColor(Color.parseColor("#25650e"));
         paint.setStrokeWidth(60);
         paint.setAntiAlias(true);
-        Shader mShader = new RadialGradient(0,0,100,new int[] {Color.RED,Color.GREEN,Color.BLUE},null, Shader.TileMode.REPEAT);
-        paint.setShader(mShader);
+        paint.setAlpha(160);
+//        Shader mShader = new RadialGradient(0,0,100,new int[] {Color.RED,Color.GREEN,Color.BLUE},null, Shader.TileMode.REPEAT);
+//        paint.setShader(mShader);
 
         return paint;
     }
@@ -105,7 +115,27 @@ public class MaskLayer extends ImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        switch (mMode) {
+            case MODE_BLUR:
+                onDrawBlurMode(canvas);
+                break;
+            case MODE_PENCEL:
+                onDrawPencelMode(canvas);
+                break;
+        }
+    }
 
+    public void onDrawPencelMode(Canvas canvas) {
+        canvas.save();
+        if (mDelegate != null && mDelegate.mPaths.size() > 0) {
+            for (Path path : mDelegate.mPaths) {
+                canvas.drawPath(path, mPaint);
+            }
+        }
+        canvas.restore();
+    }
+
+    public void onDrawBlurMode(Canvas canvas) {
         int saveFlags = Canvas.MATRIX_SAVE_FLAG | Canvas.CLIP_SAVE_FLAG | Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.FULL_COLOR_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG;
         canvas.saveLayer(0, 0, getWidth(), getHeight(), null, saveFlags);
         if (mDelegate != null && mDelegate.mPaths.size() > 0) {
